@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  devices Device[]
+  cards   Card[]
+}
+
+model Device {
+  id          String   @id @default(cuid())
+  userId      String
+  fingerprint String   @unique
+  platform    String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Card {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  userId    String
+  batchId   String?
+  status    String   @default("unused")
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+}
